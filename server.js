@@ -2,6 +2,7 @@ const express = require("express");
 const postgres = require("postgres");
 const crypto = require("crypto");
 const z = require("zod");
+const fetch = require("node-fetch");
 
 const app = express();
 const port = 8000;
@@ -224,6 +225,56 @@ app.patch("/users/:id", async (req, res) => {
     res
       .status(500)
       .send({ message: "Error updating user", error: error.message });
+  }
+});
+
+// Recuperer tous les jeux
+app.get("/f2p-games", async (req, res) => {
+  try {
+    const response = await fetch("https://www.freetogame.com/api/games");
+    const data = await response.json();
+    res.send(data);
+  } catch (error) {
+    res.status(500).send({
+      message: "Erreur lors de la récupération des jeux",
+      error: error.message,
+    });
+  }
+});
+
+// Récuperer un jeu par son ID
+app.get("/f2p-games/:id", async (req, res) => {
+  try {
+    const response = await fetch(
+      `https://www.freetogame.com/api/game?id=${req.params.id}`
+    );
+    const data = await response.json();
+    if (data) {
+      res.send(data);
+    } else {
+      res.status(404).send({ message: "Jeu non trouvé" });
+    }
+  } catch (error) {
+    res.status(500).send({
+      message: "Erreur lors de la récupération du jeu",
+      error: error.message,
+    });
+  }
+});
+
+// Tous les jeux de tir
+app.get("/f2p-games?shooter", async (req, res) => {
+  try {
+    const response = await fetch(
+      "https://www.freetogame.com/api/games?shooter"
+    );
+    const data = await response.json();
+    res.send(data);
+  } catch (error) {
+    res.status(500).send({
+      message: "Erreur lors de la récupération des jeux",
+      error: error.message,
+    });
   }
 });
 
